@@ -1,0 +1,16 @@
+# Trading Guard 2.3 运行依赖
+# 已在 Windows 11 + Python 3.13.7 上实测：aiohttp 3.14.5 / websockets 17.4 / requests 2.34.2
+# 安装：py -m pip install -r requirements.txt
+
+# 程序本体（只读行情 + 钉钉推送）真正依赖的两个包
+aiohttp>=3.9,<4
+websockets>=14,<18
+
+# 只用于 test_okx.py，以及 `diag` 里 aiohttp / requests 的对照测试
+# 主程序在没有 requests 的机器上也能正常运行
+requests>=2.28
+
+# 代理说明：
+#   本程序支持 HTTP(S) 代理（如 Clash 的混合端口 http://127.0.0.1:7897）。
+#   Clash 的 7890 是 SOCKS5 端口，需要 aiohttp-socks 才能用，本版本未实现，
+#   请改用混合端口 7897，或 --proxy http://127.0.0.1:7897 显式指定。

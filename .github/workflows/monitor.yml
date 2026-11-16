@@ -1,0 +1,40 @@
+name: Trading Guard Monitor
+
+on:
+  schedule:
+    # 每 6 小时一轮（UTC 0/6/12/18），和 --duration 配合实现近连续监控
+    - cron: '0 */6 * * *'
+  workflow_dispatch:   # 手动触发
+  push:
+    branches: [main]   # 推代码自动跑一轮，方便验证
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 358  # 6h 差 2min，留 buffer
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Self-test (离线自测)
+        run: python trading_guard.py selftest
+
+      - name: Run Trading Guard
+        env:
+          DING_WEBHOOK: ${{ secrets.DING_WEBHOOK }}
+          DING_SECRET: ${{ secrets.DING_SECRET }}
+        run: |
+          python trading_guard.py \
+            --duration 21300 \
+            --notify-stop \
+            --log-file none
